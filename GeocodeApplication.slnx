@@ -1,0 +1,14 @@
+<Solution>
+  <Folder Name="/Solution Items/">
+	<File Path="README.md" />
+	<File Path=".gitignore" />
+	<File Path=".gitattributes" />
+    <File Path="Tasks.md" />
+  </Folder>
+  <Folder Name="/Tests/">
+  </Folder>
+  <Project Path="src/Geocode.API/Geocode.API.csproj" />
+  <Project Path="src/Geocode.Application/Geocode.Application.csproj" />
+  <Project Path="src/Geocode.Contracts/Geocode.Contracts.csproj" />
+  <Project Path="src/Geocode.Lambda/Geocode.Lambda.csproj" />
+</Solution>

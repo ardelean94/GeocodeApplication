@@ -1,0 +1,22 @@
+﻿<Project Sdk="Microsoft.NET.Sdk.Web">
+
+  <PropertyGroup>
+    <TargetFramework>net8.0</TargetFramework>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <UserSecretsId>fc140199-3296-4bf8-a6da-ba6537ca17f7</UserSecretsId>
+	  <!-- `dotnet lambda deploy-function` will work just fine, project type is needed to 
+	  enable the visual option on right click `Publish to AWS lambda...`-->  
+	<AWSProjectType>Lambda</AWSProjectType>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Amazon.Lambda.AspNetCoreServer.Hosting" Version="1.10.0" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\Geocode.Application\Geocode.Application.csproj" />
+    <ProjectReference Include="..\Geocode.Contracts\Geocode.Contracts.csproj" />
+  </ItemGroup>
+
+</Project>
