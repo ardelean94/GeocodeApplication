@@ -28,15 +28,15 @@ public static class ContractMapping
             addressPattern[2] {state_code} {zip_code}
             addressPattern[3] {country}
         */
-        var addressParts = address.Split(',');
+        var addressParts = address.Trim().Split(',');
         if (addressParts.Length != addressComponentNumber)
             throw new ArgumentException($"The address must follow the US address pattern: {usAddressPattern}");
 
-        var houseAndStreet = addressParts[0].Split(' ', 2);
+        var houseAndStreet = addressParts[0].Trim().Split(' ', 2);
         if (houseAndStreet.Length != 2)
             throw new ArgumentException($"The house or street are invalid, please follow the US address pattern: {usAddressPattern}");
 
-        var stateAndZipcode = addressParts[2].Split(' ');
+        var stateAndZipcode = addressParts[2].Trim().Split(' ');
         if (stateAndZipcode.Length != 2)
             throw new ArgumentException($"The state or zip code are invalid, please follow the US address pattern: {usAddressPattern}");
 
@@ -54,7 +54,8 @@ public static class ContractMapping
             City = city,
             StateCode = stateCode,
             Zipcode = int.Parse(zipcode),
-            Country = country
+            Country = country,
+            FullAddress = address
         };
     }
 }
