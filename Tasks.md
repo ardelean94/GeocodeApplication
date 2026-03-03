@@ -14,13 +14,13 @@
 |12 | Add Validator to DI | Done | - |
 |13 | Add Geocode.API Web Api layer | Done | - |
 |14 | Add project references to Contracts and Application layer | Done | - |
-|15 | Make the project aws compatiable by adding Amazon.Lambda.AspNetCoreServer.Hosting |  | - |
+|15 | Make the project aws compatiable by adding Amazon.Lambda.AspNetCoreServer.Hosting | Done | - |
 |16 | Register the AWS Lambda Hosting mechanism to DI | Done | - |
 |17 | Add controller and implement the GET endpoint | Done | - |
-|18 | Manually create dynamoDB | Active | - |
+|18 | Manually create dynamoDB and set TTL to 30 days | Active | - |
 |19 | Add Unit Testing project | Active | - |
-|20 |  | Active | - |
-|21 |  | Active | - |
+|20 | Add logging/observability | Active | - |
+|21 | Add error handling | Active | - |
 |22 |  | Active | - |
 |23 |  | Active | - |
 |24 |  | Active | - |
