@@ -4,6 +4,6 @@ namespace Geocode.Application.Repository;
 
 public interface IGeocodeRepository
 {
-    Task<GoogleGeocodeModel> Get(Address address, CancellationToken token = default);
-    Task Create(GoogleGeocodeModel geocode, CancellationToken token = default);
+    Task<GoogleGeocodeModel?> Get(string cacheKey, CancellationToken token = default);
+    Task Create(GeocodeCache geocode, CancellationToken token = default);
 }

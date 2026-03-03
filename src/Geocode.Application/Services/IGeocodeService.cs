@@ -4,5 +4,5 @@ namespace Geocode.Application.Services;
 
 public interface IGeocodeService
 {
-    Task<GoogleGeocodeModel> Get(Address address, CancellationToken token = default);
+    Task<GoogleGeocodeModel> Get(string address, CancellationToken token = default);
 }

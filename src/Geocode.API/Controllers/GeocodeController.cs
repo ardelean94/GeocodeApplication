@@ -23,9 +23,9 @@ public class GeocodeController : ControllerBase
     [HttpGet]
     public async Task<IActionResult> Get([FromQuery] AddressRequest request, CancellationToken token)
     {
-        Address address = request.MapToAddress();
+        var response = await geocodeService.Get(request.Address, token);
 
-        var response = await geocodeService.Get(address, token);
+        if (response is null) return NotFound();
 
         return Ok(response);
     }

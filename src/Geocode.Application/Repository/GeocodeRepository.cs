@@ -12,18 +12,14 @@ public class GeocodeRepository : IGeocodeRepository
         this.context = context;
     }
 
-    public async Task Create(GoogleGeocodeModel geocode, CancellationToken token = default)
+    public async Task Create(GeocodeCache geocode, CancellationToken token = default)
     {
         await context.SaveAsync(geocode, token);
     }
 
-    public async Task<GoogleGeocodeModel> Get(Address address, CancellationToken token = default)
+    public async Task<GoogleGeocodeModel?> Get(string cacheKey, CancellationToken token = default)
     {
-        //  To be defined
-        string hashKey = string.Empty;
-        string sortKey = string.Empty;
-
-        var geocode = await context.LoadAsync<GoogleGeocodeModel>(hashKey, sortKey, token);
+        var geocode = await context.LoadAsync<GoogleGeocodeModel>(cacheKey, token);
         return geocode;
     }
 }

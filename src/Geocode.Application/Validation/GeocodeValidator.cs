@@ -3,9 +3,9 @@ using Geocode.Application.Models;
 
 namespace FluentValidationDemo.Validation;
 
-public class AddressValidator : AbstractValidator<Address>
+public class GeocodeValidator : AbstractValidator<GeocodeCache>
 {
-	public AddressValidator()
+	public GeocodeValidator()
 	{
 		RuleFor(x => x.HouseNumber)
 			.GreaterThan(0)
