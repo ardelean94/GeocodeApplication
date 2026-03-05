@@ -16,7 +16,9 @@ public class GeocodeService : IGeocodeService
     private readonly IGeocodeRepository geocodeRepository;
     private static readonly HttpClient httpClient = new();
     private readonly string apiKey = string.Empty;
-    
+    private readonly int cacheTTLDays;
+    private readonly string createdAtDateFormat = string.Empty;
+
     public GeocodeService(IConfiguration configuration, 
         ILogger<GeocodeService> logger,
         IGeocodeRepository geocodeRepository)
@@ -24,11 +26,15 @@ public class GeocodeService : IGeocodeService
         this.configuration = configuration;
         this.logger = logger;
         this.geocodeRepository = geocodeRepository;
-        var geocodeRequest = Path.Combine(configuration["GOOGLE_API_GET_GEOCODE"], configuration["GOOGLE_API_GEOCODE_REQUEST_FORMAT"]);
+        var geocodeRequest = Path.Combine(
+            configuration.GetSection("GOOGLE_API_GET_GEOCODE").Value,
+            configuration.GetSection("GOOGLE_API_GEOCODE_REQUEST_FORMAT").Value);
         httpClient.BaseAddress = new Uri(geocodeRequest);
         httpClient.Timeout = TimeSpan.FromSeconds(5);
 
-        apiKey = configuration["GOOGLE_GEOCODE_API_KEY"];
+        apiKey = configuration.GetSection("GOOGLE_GEOCODE_API_KEY").Value;
+        cacheTTLDays = int.Parse(configuration.GetSection("CACHE_TTL_DAYS").Value);
+        createdAtDateFormat = configuration.GetSection("CACHE_CREATEDAT_FORMAT").Value;
     }
 
     public async Task<GeocodeCache> Get(string address, CancellationToken token = default)
@@ -80,29 +86,29 @@ public class GeocodeService : IGeocodeService
         if (stateAndZipcode.Length != 2)
             throw new ArgumentException($"The state or zip code are invalid, please follow the US address pattern: {usAddressPattern}");
 
-        var houseNumber = houseAndStreet[0];
+        var normalizedAddress = NormalizeAddress(address);
+        var cacheKey = BuildCacheKey(normalizedAddress);
+        var houseNumber = int.Parse(houseAndStreet[0]);
         var street = houseAndStreet[1];
         var city = addressParts[1];
         var stateCode = stateAndZipcode[0];
-        var zipcode = stateAndZipcode[1];
+        var zipcode = int.Parse(stateAndZipcode[1]);
         var country = addressParts[3];
-        var normalizedAddress = NormalizeAddress(address);
-        var cacheKey = BuildCacheKey(normalizedAddress);
 
         return new GeocodeCache
         {
             AddressCacheKey = cacheKey,
             NormalizedAddress = normalizedAddress,
             OriginalAddress = address,
-            HouseNumber = int.Parse(houseNumber),
+            HouseNumber = houseNumber,
             Street = street,
             City = city,
             StateCode = stateCode,
-            Zipcode = int.Parse(zipcode),
+            Zipcode = zipcode,
             Country = country,
             GoogleResponse = model,
-            CreatedAt = DateTime.UtcNow.ToString("yyyy-MM-ddTHH:mm:ssZ"),
-            ExpiresAt = DateTimeOffset.UtcNow.AddDays(30).ToUnixTimeSeconds()
+            CreatedAt = DateTime.UtcNow.ToString(createdAtDateFormat),
+            ExpiresAt = DateTimeOffset.UtcNow.AddDays(cacheTTLDays).ToUnixTimeSeconds()
         };
     }
 
