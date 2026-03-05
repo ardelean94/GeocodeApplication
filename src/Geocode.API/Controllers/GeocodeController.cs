@@ -1,10 +1,7 @@
 ﻿using Microsoft.AspNetCore.Mvc;
-using Geocode.Contracts;
 using Geocode.Contracts.Requests;
-using Amazon.Lambda.Core;
 using Geocode.Application.Services;
 using System.Threading.Tasks;
-using Geocode.Application.Models;
 using Geocode.API.Mapping;
 
 namespace Geocode.API.Controllers;
@@ -27,6 +24,6 @@ public class GeocodeController : ControllerBase
 
         if (response is null) return NotFound();
 
-        return Ok(response);
+        return Ok(response.MapToResponse());
     }
 }
