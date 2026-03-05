@@ -16,7 +16,7 @@ public class GeocodeService : IGeocodeService
     private readonly IGeocodeRepository geocodeRepository;
     private static readonly HttpClient httpClient = new();
     private readonly string apiKey = string.Empty;
-
+    
     public GeocodeService(IConfiguration configuration, 
         ILogger<GeocodeService> logger,
         IGeocodeRepository geocodeRepository)
@@ -31,9 +31,9 @@ public class GeocodeService : IGeocodeService
         apiKey = configuration["GOOGLE_GEOCODE_API_KEY"];
     }
 
-    public async Task<GoogleGeocodeModel> Get(string address, CancellationToken token = default)
+    public async Task<GeocodeCache> Get(string address, CancellationToken token = default)
     {
-        GoogleGeocodeModel result = null;
+        GeocodeCache result = null;
         string normalizedAddress = NormalizeAddress(address);
         string addressCacheKey = BuildCacheKey(normalizedAddress);
         result = await geocodeRepository.Get(addressCacheKey, token);
@@ -41,10 +41,9 @@ public class GeocodeService : IGeocodeService
         if (result is null)
         {
             var googleGeocode = await FetchGeocodeDataAsync(address, token);
-            GeocodeCache geocodeCache = BuildGeocodeCache(address, googleGeocode);
+            result = BuildGeocodeCache(address, googleGeocode);
 
-            await Create(geocodeCache, token);
-            return googleGeocode;
+            await Create(result, token);            
         }
 
         return result;
@@ -101,7 +100,7 @@ public class GeocodeService : IGeocodeService
             StateCode = stateCode,
             Zipcode = int.Parse(zipcode),
             Country = country,
-            GoogleResponse = JsonSerializer.Serialize(model),
+            GoogleResponse = model,
             CreatedAt = DateTime.UtcNow.ToString("yyyy-MM-ddTHH:mm:ssZ"),
             ExpiresAt = DateTimeOffset.UtcNow.AddDays(30).ToUnixTimeSeconds()
         };

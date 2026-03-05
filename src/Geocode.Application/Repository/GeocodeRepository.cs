@@ -17,9 +17,9 @@ public class GeocodeRepository : IGeocodeRepository
         await context.SaveAsync(geocode, token);
     }
 
-    public async Task<GoogleGeocodeModel?> Get(string cacheKey, CancellationToken token = default)
+    public async Task<GeocodeCache?> Get(string cacheKey, CancellationToken token = default)
     {
-        var geocode = await context.LoadAsync<GoogleGeocodeModel>(cacheKey, token);
+        var geocode = await context.LoadAsync<GeocodeCache>(cacheKey, token);
         return geocode;
     }
 }
