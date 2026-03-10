@@ -76,15 +76,15 @@ public class GeocodeService : IGeocodeService
         */
         var addressParts = address.Trim().Split(',');
         if (addressParts.Length != addressComponentNumber)
-            throw new ArgumentException($"The address must follow the US address pattern: {usAddressPattern}");
+            throw new ArgumentNullException(nameof(address), $"The address must follow the US address pattern: {usAddressPattern}");
 
         var houseAndStreet = addressParts[0].Trim().Split(' ', 2);
         if (houseAndStreet.Length != 2)
-            throw new ArgumentException($"The house or street are invalid, please follow the US address pattern: {usAddressPattern}");
+            throw new ArgumentNullException(nameof(address), $"The house or street are invalid, please follow the US address pattern: {usAddressPattern}");
 
         var stateAndZipcode = addressParts[2].Trim().Split(' ');
         if (stateAndZipcode.Length != 2)
-            throw new ArgumentException($"The state or zip code are invalid, please follow the US address pattern: {usAddressPattern}");
+            throw new ArgumentNullException(nameof(address), $"The state or zip code are invalid, please follow the US address pattern: {usAddressPattern}");
 
         var normalizedAddress = NormalizeAddress(address);
         var cacheKey = BuildCacheKey(normalizedAddress);
