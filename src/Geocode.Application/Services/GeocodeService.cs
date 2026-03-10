@@ -14,7 +14,7 @@ public class GeocodeService : IGeocodeService
     private readonly IConfiguration configuration;
     private readonly ILogger<GeocodeService> logger;
     private readonly IGeocodeRepository geocodeRepository;
-    private static readonly HttpClient httpClient = new();
+    private readonly HttpClient httpClient;
     private readonly string apiKey = string.Empty;
     private readonly int cacheTTLDays;
     private readonly string createdAtDateFormat = string.Empty;
@@ -29,8 +29,15 @@ public class GeocodeService : IGeocodeService
         var geocodeRequest = Path.Combine(
             configuration.GetSection("GOOGLE_API_GET_GEOCODE").Value,
             configuration.GetSection("GOOGLE_API_GEOCODE_REQUEST_FORMAT").Value);
-        httpClient.BaseAddress = new Uri(geocodeRequest);
-        httpClient.Timeout = TimeSpan.FromSeconds(5);
+
+        httpClient = new(new SocketsHttpHandler
+            {
+                PooledConnectionLifetime = TimeSpan.FromMinutes(15)
+            })
+        {
+            BaseAddress = new Uri(geocodeRequest),
+            Timeout = TimeSpan.FromSeconds(5)
+        };
 
         apiKey = configuration.GetSection("GOOGLE_GEOCODE_API_KEY").Value;
         cacheTTLDays = int.Parse(configuration.GetSection("CACHE_TTL_DAYS").Value);
