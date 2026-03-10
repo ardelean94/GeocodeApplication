@@ -17,13 +17,13 @@
 |15 | Make the project aws compatiable by adding Amazon.Lambda.AspNetCoreServer.Hosting | Done | - |
 |16 | Register the AWS Lambda Hosting mechanism to DI | Done | - |
 |17 | Add controller and implement the GET endpoint | Done | - |
-|18 | Manually create dynamoDB and set TTL to 30 days | Active | - |
+|18 | Manually create dynamoDB and set TTL to 30 days | Done | Find a way to provision the database at deploy |
 |19 | Add Unit Testing project | Active | - |
 |20 | Add logging/observability | Active | - |
-|21 | Add error handling | Active | - |
-|22 |  | Active | - |
-|23 |  | Active | - |
-|24 |  | Active | - |
+|21 | Add error handling | In progress | - |
+|22 | Add database provisioning on deploy | Active | - |
+|23 | Replace class models with records for simplicity | Active | - |
+|24 | Check if `[JsonPropertyName("<field_name_>")]` is necessary when first letter needs lowercase | Active | - |
 |25 |  | Active | - |
 |26 |  | Active | - |
 |27 |  | Active | - |

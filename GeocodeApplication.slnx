@@ -4,6 +4,7 @@
 	<File Path=".gitignore" />
 	<File Path=".gitattributes" />
     <File Path="Tasks.md" />
+	<File Path="LICENSE" />
   </Folder>
   <Folder Name="/Tests/">
   </Folder>

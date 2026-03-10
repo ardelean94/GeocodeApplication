@@ -1,4 +1,4 @@
-# GeocodeApplication
+# Geocode Application
 
 Serverless Geocoding Cache
 
@@ -24,3 +24,7 @@ Technologies:
 - AWS Lambda
 - AWS DynamoDB
 - Google Geocoding API
+
+Keep in mind:
+- Set env variables in Lamba function
+- Set lambda execution role (`function-role`) permissions for both aws lambda execution and dynamodb
