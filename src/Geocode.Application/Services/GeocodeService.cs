@@ -142,22 +142,25 @@ public class GeocodeService : IGeocodeService
     {
         var encodedAddress = Uri.EscapeDataString(address);
         var requestUrl = $"?address={encodedAddress}&key={apiKey}";
-        HttpResponseMessage response;
+        HttpResponseMessage responseMessage;
         GoogleGeocodeModel? output = null;
 
         try
         {
-            response = await httpClient.GetAsync(requestUrl, token);
-            
-            if (response.IsSuccessStatusCode)
-            {
-                using var contentStream = await response.Content.ReadAsStreamAsync(token);
-                output = await DeserializeResponseAsync(contentStream, token);
-            }
+            responseMessage = await httpClient.GetAsync(requestUrl, token);
+            responseMessage.EnsureSuccessStatusCode();
+
+            using var contentStream = await responseMessage.Content.ReadAsStreamAsync(token);
+            output = await DeserializeResponseAsync(contentStream, token);
         }
-        catch(TaskCanceledException ex) when (!token.IsCancellationRequested)
+        catch(HttpRequestException exReq)
         {
-            logger.LogError($"Fetch geocode with data {address} error: {ex.Message}");
+            logger.LogError("Http Request Exception: {Message}", exReq.Message);
+            throw;
+        }
+        catch(TaskCanceledException exTsk)
+        {
+            logger.LogError("Task Canceled Exception: {Message}", exTsk.Message);
             throw;
         }
 
@@ -176,9 +179,9 @@ public class GeocodeService : IGeocodeService
                 jsonOptions,
                 token);
         }
-        catch (Exception ex)
+        catch (JsonException ex)
         {
-            logger.LogError($"Failed to deserialize data", ex);
+            logger.LogError("Failed to deserialize google geocode response: {Message}", ex.Message);
             throw;
         }
         return geocode;
