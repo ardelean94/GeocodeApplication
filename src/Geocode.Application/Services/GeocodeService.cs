@@ -2,7 +2,6 @@
 using Geocode.Application.Models;
 using Geocode.Application.Options;
 using Geocode.Application.Repository;
-using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using System.Security.Cryptography;
@@ -13,34 +12,37 @@ namespace Geocode.Application.Services;
 
 public class GeocodeService : IGeocodeService
 {
-    private readonly IConfiguration configuration;
     private readonly ILogger<GeocodeService> logger;
     private readonly IGeocodeRepository geocodeRepository;
     private readonly GeocodeHttp geocodeHttp;
-    private readonly IOptions<DynamoDBOptions> options;
+    private readonly IOptions<DynamoDBOptions> dynamoDbOptions;
     private readonly IOptions<GeocodeOptions> geocodeOptions;
     private readonly HttpClient httpClient;
     private readonly int cacheTTLDays;
     private readonly string createdAtDateFormat = string.Empty;
 
-    public GeocodeService(IConfiguration configuration,
+    public GeocodeService(
         ILogger<GeocodeService> logger,
         IGeocodeRepository geocodeRepository,
         GeocodeHttp geocodeHttp,
         IOptions<DynamoDBOptions> dynamoOptions,
         IOptions<GeocodeOptions> geocodeOptions)
 	{
-        this.configuration = configuration;
         this.logger = logger;
         this.geocodeRepository = geocodeRepository;
         this.geocodeHttp = geocodeHttp;
-        this.options = dynamoOptions;
+        this.dynamoDbOptions = dynamoOptions;
         this.geocodeOptions = geocodeOptions;
     }
 
     public async Task<GeocodeCache> Get(string addressInput, CancellationToken token = default)
     {
-        Address address = addressInput.FormatAddress();
+        var address = addressInput.FormatAddress();
+
+        if (address.IsFailure)
+        {
+            throw new Exception(address.Error.Message);
+        }
 
         string normalizedAddress = NormalizeAddress(addressInput);
         string addressCacheKey = BuildCacheKey(normalizedAddress);
@@ -50,7 +52,7 @@ public class GeocodeService : IGeocodeService
         if (result is null)
         {
             var googleGeocode = await geocodeHttp.FetchGeocodeDataAsync(addressInput, geocodeOptions.Value.ApiKey, token);
-            result = BuildGeocodeCache(address, addressCacheKey, normalizedAddress, googleGeocode);
+            result = BuildGeocodeCache(address.Value, addressCacheKey, normalizedAddress, googleGeocode);
 
             await Create(result, token);
         }
@@ -77,8 +79,8 @@ public class GeocodeService : IGeocodeService
             Zipcode = address.Zipcode,
             Country = address.Country,
             GoogleResponse = model,
-            CreatedAt = DateTime.UtcNow.ToString(options.Value.CreatedAtDateFormat),
-            ExpiresAt = DateTimeOffset.UtcNow.AddDays(options.Value.CacheTTLDays).ToUnixTimeSeconds()
+            CreatedAt = DateTime.UtcNow.ToString(dynamoDbOptions.Value.CreatedAtDateFormat),
+            ExpiresAt = DateTimeOffset.UtcNow.AddDays(dynamoDbOptions.Value.CacheTTLDays).ToUnixTimeSeconds()
         };
     }
 

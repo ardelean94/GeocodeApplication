@@ -1,18 +1,18 @@
-﻿using Geocode.Application.Models;
+﻿using Geocode.Application.Abstractions;
+using Geocode.Application.Models;
 
 namespace Geocode.Application.Extensions;
 
 internal static class AddressExtensions
 {
-    internal static Address FormatAddress(this string address)
+    internal static Result<Address> FormatAddress(this string address)
     {
         if (string.IsNullOrEmpty(address))
-            throw new ArgumentException(nameof(address), "Address cannot be null or empty");
+            return Result.Failure<Address>(AddressErrors.NullOrEmpty);
 
         //  US address pattern:
         //  {house_number} {street}, {city}, {state_code} {zip_code}, {country}
         const int addressComponentNumber = 4;
-        string usAddressPattern = "{house_number} {street}, {city}, {state_code} {zip_code}, {country}";
 
         /* 
          Address after split for `,`
@@ -23,21 +23,21 @@ internal static class AddressExtensions
         */
         var addressParts = address.Trim().Split(',');
         if (addressParts.Length != addressComponentNumber)
-            throw new ArgumentNullException(nameof(address), $"The address must follow the US address pattern: {usAddressPattern}");
+            return Result.Failure<Address>(AddressErrors.InvalidAddress);
 
         var houseAndStreet = addressParts[0].Trim().Split(' ', 2);
         if (houseAndStreet.Length != 2)
-            throw new ArgumentNullException(nameof(address), $"The house or street are invalid, please follow the US address pattern: {usAddressPattern}");
+            return Result.Failure<Address>(AddressErrors.InvalidHouseOrStreet);
 
-        if(int.TryParse(houseAndStreet[0], out int houseNoValue) == false)
-            throw new ArgumentException($"The house number must be in number format.");
+        if (int.TryParse(houseAndStreet[0], out int houseNoValue) == false)
+            return Result.Failure<Address>(AddressErrors.InvalidHouseNumber);
 
         var stateAndZipcode = addressParts[2].Trim().Split(' ');
         if (stateAndZipcode.Length != 2)
-            throw new ArgumentNullException(nameof(address), $"The state or zip code are invalid, please follow the US address pattern: {usAddressPattern}");
+            return Result.Failure<Address>(AddressErrors.InvalidStateOrZipcode);
 
         if (int.TryParse(stateAndZipcode[1], out int zipcodeValue) == false)
-            throw new ArgumentException($"The zipcode must be in number format.");
+            return Result.Failure<Address>(AddressErrors.InvalidZipcode);
 
         var houseNumber = houseNoValue;
         var street = houseAndStreet[1];
@@ -46,7 +46,7 @@ internal static class AddressExtensions
         var zipcode = zipcodeValue;
         var country = addressParts[3];
 
-        return new Address
+        var output = new Address
         {
             InputAddress = address,
             City = city,
@@ -56,5 +56,7 @@ internal static class AddressExtensions
             Zipcode = zipcode,
             Street = street
         };
+
+        return Result.Success(output);
     }
 }
