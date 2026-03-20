@@ -33,7 +33,7 @@ public static class ApplicationServiceCollectionExtensions
                 !string.IsNullOrEmpty(options.GeocodeUrlResponseFormat),
                 "Geocode Options failed validation.");
 
-        services.AddHttpClient<GeocodeHttp>((serviceProvider, client) =>
+        services.AddHttpClient<IGeocodeHttp, GeocodeHttp>((serviceProvider, client) =>
         {
             var geocodeInfo = serviceProvider.GetRequiredService<IOptions<GeocodeOptions>>();
 

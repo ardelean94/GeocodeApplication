@@ -1,12 +1,14 @@
-﻿using Geocode.Application.Models;
+﻿using Geocode.Application.Abstractions;
+using Geocode.Application.Models;
+using Geocode.Application.ResultErrors;
 using Microsoft.Extensions.Logging;
 using System.Text.Json;
 
 namespace Geocode.Application.Services;
 
-public class GeocodeHttp(HttpClient httpClient, ILogger<GeocodeHttp> logger)
+public class GeocodeHttp(HttpClient httpClient, ILogger<GeocodeHttp> logger) : IGeocodeHttp
 {
-    public async Task<GoogleGeocodeModel?> FetchGeocodeDataAsync(string address, string apiKey, CancellationToken token = default)
+    public async Task<Result<GoogleGeocodeModel?>> FetchGeocodeDataAsync(string address, string apiKey, CancellationToken token = default)
     {
         var encodedAddress = Uri.EscapeDataString(address);
         var requestUrl = $"?address={encodedAddress}&key={apiKey}";
@@ -24,15 +26,15 @@ public class GeocodeHttp(HttpClient httpClient, ILogger<GeocodeHttp> logger)
         catch (HttpRequestException exReq)
         {
             logger.LogError("Http Request Exception: {Message}", exReq.Message);
-            throw;
+            return Result.Failure<GoogleGeocodeModel?>(HttpErrors.HttpRequestFailed);
         }
         catch (TaskCanceledException exTsk)
         {
             logger.LogError("Task Canceled Exception: {Message}", exTsk.Message);
-            throw;
+            return Result.Failure<GoogleGeocodeModel?>(HttpErrors.TaskCancelled);
         }
 
-        return output;
+        return Result.Success(output);
     }
 
     private async Task<GoogleGeocodeModel?> DeserializeResponseAsync(Stream stream, CancellationToken token)
