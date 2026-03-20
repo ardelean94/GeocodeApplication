@@ -18,14 +18,14 @@
 |16 | Register the AWS Lambda Hosting mechanism to DI | Done | - |
 |17 | Add controller and implement the GET endpoint | Done | - |
 |18 | Manually create dynamoDB and set TTL to 30 days | Done | Find a way to provision the database at deploy |
-|19 | Add Unit Testing project | In Progress | - |
+|19 | Add Unit Testing project | Done | - |
 |20 | Add logging/observability | Active | - |
 |21 | Add error handling | Done | - |
 |22 | Add database provisioning on deploy | Active | - |
 |23 | Replace class models with records for simplicity | Active | - |
 |24 | Check if `[JsonPropertyName("<field_name_>")]` is necessary when first letter needs lowercase | Active | - |
 |25 | When TTL expires dynamodb's record may not get deleted right away, due to the background worker that's running periodically, 
-fix logic in geocode service to check for that | Active | - |
+fix logic in geocode service to check for that | In progress | - |
 |26 |  | Active | - |
 |27 |  | Active | - |
 |28 |  | Active | - |
