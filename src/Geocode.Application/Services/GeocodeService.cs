@@ -1,4 +1,5 @@
-﻿using Geocode.Application.Extensions;
+﻿using Geocode.Application.Abstractions;
+using Geocode.Application.Extensions;
 using Geocode.Application.Models;
 using Geocode.Application.Options;
 using Geocode.Application.Repository;
@@ -35,13 +36,13 @@ public class GeocodeService : IGeocodeService
         this.geocodeOptions = geocodeOptions;
     }
 
-    public async Task<GeocodeCache> Get(string addressInput, CancellationToken token = default)
+    public async Task<Result<GeocodeCache>> Get(string addressInput, CancellationToken token = default)
     {
         var address = addressInput.FormatAddress();
 
         if (address.IsFailure)
         {
-            throw new Exception(address.Error.Message);
+            return Result.Failure<GeocodeCache>(address.Error);
         }
 
         string normalizedAddress = NormalizeAddress(addressInput);
@@ -57,7 +58,7 @@ public class GeocodeService : IGeocodeService
             await Create(result, token);
         }
 
-        return result;
+        return Result.Success(result);
     }
 
     public async Task Create(GeocodeCache geocode, CancellationToken token = default)

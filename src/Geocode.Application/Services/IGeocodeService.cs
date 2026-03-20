@@ -1,8 +1,9 @@
-﻿using Geocode.Application.Models;
+﻿using Geocode.Application.Abstractions;
+using Geocode.Application.Models;
 
 namespace Geocode.Application.Services;
 
 public interface IGeocodeService
 {
-    Task<GeocodeCache> Get(string address, CancellationToken token = default);
+    Task<Result<GeocodeCache>> Get(string address, CancellationToken token = default);
 }

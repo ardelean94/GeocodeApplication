@@ -22,8 +22,9 @@ public class GeocodeController : ControllerBase
     {
         var response = await geocodeService.Get(request.Address, token);
 
-        if (response is null) return NotFound();
+        if (response.IsFailure)
+            return BadRequest(response.Error);
 
-        return Ok(response.MapToResponse());
+        return Ok(response.Value.MapToResponse());
     }
 }
