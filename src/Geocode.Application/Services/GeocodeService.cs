@@ -8,24 +8,22 @@ using Microsoft.Extensions.Options;
 using System.Security.Cryptography;
 using System.Text;
 
-
 namespace Geocode.Application.Services;
 
 public class GeocodeService : IGeocodeService
 {
     private readonly ILogger<GeocodeService> logger;
     private readonly IGeocodeRepository geocodeRepository;
-    private readonly GeocodeHttp geocodeHttp;
+    private readonly IGeocodeHttp geocodeHttp;
     private readonly IOptions<DynamoDBOptions> dynamoDbOptions;
     private readonly IOptions<GeocodeOptions> geocodeOptions;
-    private readonly HttpClient httpClient;
     private readonly int cacheTTLDays;
     private readonly string createdAtDateFormat = string.Empty;
 
     public GeocodeService(
         ILogger<GeocodeService> logger,
         IGeocodeRepository geocodeRepository,
-        GeocodeHttp geocodeHttp,
+        IGeocodeHttp geocodeHttp,
         IOptions<DynamoDBOptions> dynamoOptions,
         IOptions<GeocodeOptions> geocodeOptions)
 	{
@@ -41,32 +39,36 @@ public class GeocodeService : IGeocodeService
         var address = addressInput.FormatAddress();
 
         if (address.IsFailure)
-        {
             return Result.Failure<GeocodeCache>(address.Error);
-        }
 
         string normalizedAddress = NormalizeAddress(addressInput);
         string addressCacheKey = BuildCacheKey(normalizedAddress);
         
-        GeocodeCache? result = await geocodeRepository.Get(addressCacheKey, token);
+        var cacheItem = await geocodeRepository.Get(addressCacheKey, token);
 
-        if (result is null)
-        {
-            var googleGeocode = await geocodeHttp.FetchGeocodeDataAsync(addressInput, geocodeOptions.Value.ApiKey, token);
-            result = BuildGeocodeCache(address.Value, addressCacheKey, normalizedAddress, googleGeocode);
+        if (cacheItem.IsFailure)
+            return Result.Failure<GeocodeCache>(cacheItem.Error);
+        
+        //  cache hit
+        if(cacheItem.Value is not null)
+            return Result.Success<GeocodeCache>(cacheItem.Value!);
 
-            await Create(result, token);
-        }
+        //  cache miss
+        var googleGeocodeResult = await geocodeHttp.FetchGeocodeDataAsync(addressInput, geocodeOptions.Value.ApiKey, token);
+        
+        if (googleGeocodeResult.IsFailure)
+            return Result.Failure<GeocodeCache>(googleGeocodeResult.Error);
 
-        return Result.Success(result);
+        var geocodeRecord = BuildGeocodeCache(address.Value, addressCacheKey, normalizedAddress, googleGeocodeResult.Value!);
+
+        var result = await geocodeRepository.Create(geocodeRecord, token);
+        if (result.IsFailure)
+            return Result.Failure<GeocodeCache>(result.Error);
+
+        return Result.Success(geocodeRecord);
     }
 
-    public async Task Create(GeocodeCache geocode, CancellationToken token = default)
-    {
-        await geocodeRepository.Create(geocode, token);
-    }
-
-    private GeocodeCache BuildGeocodeCache(Address address, string cacheKey, string normalized, GoogleGeocodeModel model)
+    internal GeocodeCache BuildGeocodeCache(Address address, string cacheKey, string normalized, GoogleGeocodeModel model)
     {
         return new GeocodeCache
         {
@@ -85,13 +87,13 @@ public class GeocodeService : IGeocodeService
         };
     }
 
-    private string BuildCacheKey(string normalizedAddress)
+    internal string BuildCacheKey(string normalizedAddress)
     {
         var bytes = SHA256.HashData(Encoding.UTF8.GetBytes(normalizedAddress));
         return Convert.ToHexString(bytes).ToLowerInvariant();
     }
 
-    private string NormalizeAddress(string address)
+    internal string NormalizeAddress(string address)
     {
         return address
             .Trim()
