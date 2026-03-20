@@ -7,6 +7,7 @@
 	<File Path="LICENSE" />
   </Folder>
   <Folder Name="/Tests/">
+    <Project Path="Geocode.Application.UnitTests/Geocode.Application.UnitTests.csproj" Id="039df943-0ee0-4844-8595-2c9ac6c4a558" />
   </Folder>
   <Project Path="src/Geocode.API/Geocode.API.csproj" />
   <Project Path="src/Geocode.Application/Geocode.Application.csproj" />
