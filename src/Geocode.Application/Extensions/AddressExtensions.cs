@@ -1,5 +1,6 @@
 ﻿using Geocode.Application.Abstractions;
 using Geocode.Application.Models;
+using Geocode.Application.ResultErrors;
 
 namespace Geocode.Application.Extensions;
 
@@ -36,6 +37,9 @@ internal static class AddressExtensions
         if (stateAndZipcode.Length != 2)
             return Result.Failure<Address>(AddressErrors.InvalidStateOrZipcode);
 
+        if (stateAndZipcode[0].Any(p => char.IsDigit(p)))
+            return Result.Failure<Address>(AddressErrors.InvalidStateCode);
+        
         if (int.TryParse(stateAndZipcode[1], out int zipcodeValue) == false)
             return Result.Failure<Address>(AddressErrors.InvalidZipcode);
 

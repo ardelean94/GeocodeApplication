@@ -1,6 +1,6 @@
 ﻿using Geocode.Application.Abstractions;
 
-namespace Geocode.Application.Extensions;
+namespace Geocode.Application.ResultErrors;
 
 public static class AddressErrors
 {
@@ -29,4 +29,8 @@ public static class AddressErrors
     public static readonly Error InvalidZipcode = new(
         "Address.InvalidZipcode",
         "The zipcode must be in number format.");
+
+    public static readonly Error InvalidStateCode = new(
+        "Address.InvalidStateCode",
+        "The state code must not be in number format.");
 }
