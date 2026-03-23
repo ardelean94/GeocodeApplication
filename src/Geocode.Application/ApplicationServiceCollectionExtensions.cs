@@ -23,7 +23,7 @@ public static class ApplicationServiceCollectionExtensions
             .BindConfiguration("DynamoDBInfo")
             .Validate(options =>
                 !string.IsNullOrEmpty(options.CreatedAtDateFormat),
-                "DynamoDB Options failed validation.");
+                "Database configuration failed validation.");
 
         services.AddOptions<GeocodeOptions>()
             .BindConfiguration("GeocodeInfo")
@@ -31,7 +31,7 @@ public static class ApplicationServiceCollectionExtensions
                 !string.IsNullOrEmpty(options.ApiKey) &&
                 !string.IsNullOrEmpty(options.GeocodeUrl) &&
                 !string.IsNullOrEmpty(options.GeocodeUrlResponseFormat),
-                "Geocode Options failed validation.");
+                "Geocode configuration failed validation.");
 
         services.AddHttpClient<IGeocodeHttp, GeocodeHttp>((serviceProvider, client) =>
         {
