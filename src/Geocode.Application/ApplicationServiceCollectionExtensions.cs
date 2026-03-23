@@ -1,6 +1,5 @@
 ﻿using Amazon.DynamoDBv2;
 using Amazon.DynamoDBv2.DataModel;
-using FluentValidation;
 using Geocode.Application.Options;
 using Geocode.Application.Repository;
 using Geocode.Application.Services;
@@ -17,7 +16,6 @@ public static class ApplicationServiceCollectionExtensions
         var awsOptions = config.GetAWSOptions();
         services.AddDefaultAWSOptions(awsOptions);
         services.AddSingleton<IGeocodeService, GeocodeService>();
-        services.AddValidatorsFromAssemblyContaining<IApplicationMarker>(ServiceLifetime.Transient);
 
         services.AddOptions<DynamoDBOptions>()
             .BindConfiguration("DynamoDBInfo")
